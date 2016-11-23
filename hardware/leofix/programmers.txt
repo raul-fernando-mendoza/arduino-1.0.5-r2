@@ -1,0 +1,4 @@
+arduinoispleo.name=Arduino as ISP (Leonardo)
+arduinoispleo.communication=serial
+arduinoispleo.protocol=arduino
+arduinoispleo.speed=19200
