@@ -17,10 +17,10 @@
   by Arturo Guadalupi
 */
 
-#define INPUT_PORT A0
+#define INPUT_PORT A1
 
 int sensorValueNew = 0;
-int sensorValueOld = 0;
+int sensorValueOld = 1024;
 unsigned long timeNew = 0L;
 
 // the setup function runs once when you press reset or power the board
@@ -43,12 +43,12 @@ void loop() {
  
   sensorValueNew = analogRead(INPUT_PORT);
 
-    if( abs( sensorValueNew  - sensorValueOld) > 3 ){
-       Serial.print(sensorValueNew  - sensorValueOld);
+    if( abs( sensorValueNew  - sensorValueOld) > 4 ){
+     /*  Serial.print(sensorValueNew  - sensorValueOld);
        Serial.print("\t");
        Serial.print(timeNew);
+       */
 
-       Serial.print("\t");
        Serial.println(sensorValueNew);
        sensorValueOld = sensorValueNew;
     }
