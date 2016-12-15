@@ -18,6 +18,9 @@
 */
 
 #define INPUT_PORT A1
+#define C1 12
+#define C2 11
+#define C3 10
 
 int sensorValueNew = 0;
 int sensorValueOld = 1024;
@@ -26,8 +29,10 @@ unsigned long timeNew = 0L;
 // the setup function runs once when you press reset or power the board
 void setup() {
   // initialize digital pin LED_BUILTIN as an output.
-  pinMode(INPUT_PORT, INPUT);
-  
+  pinMode(C1, OUTPUT);
+  pinMode(C2, OUTPUT);
+  pinMode(C3, OUTPUT);
+  pinMode(INPUT_PORT,INPUT);  
   
   Serial.begin(9600);
    // while the serial stream is not open, do nothing:
@@ -42,6 +47,20 @@ void loop() {
   timeNew = millis();
  
   sensorValueNew = analogRead(INPUT_PORT);
+  
+      digitalWrite(C1, HIGH);
+      digitalWrite(C2, LOW  );
+      digitalWrite(C3, LOW);
+delay(1000);
+      digitalWrite(C1, LOW);
+      digitalWrite(C2, HIGH  );
+      digitalWrite(C3, LOW);
+delay(1000);
+      digitalWrite(C1, LOW);
+      digitalWrite(C2, LOW  );
+      digitalWrite(C3, HIGH);
+delay(2000);
+
 
     if( abs( sensorValueNew  - sensorValueOld) > 4 ){
      /*  Serial.print(sensorValueNew  - sensorValueOld);
