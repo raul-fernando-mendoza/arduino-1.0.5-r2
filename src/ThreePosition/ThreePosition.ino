@@ -52,6 +52,7 @@ int minSensorValueNext = 1024/2;
 unsigned long lastSensorValueMaxTime = 0;
 
 unsigned long timeToStartDebug = 0;
+unsigned long timeToReportSpeed = 0;
 
 boolean coilDriven = false;
 
@@ -240,19 +241,17 @@ void loop() {
       
     }
     else if(  -1 == curveDirection && currentDegrees <= 90 && currentCoil == 2 ){
-      /*      
-      if( 1 == currentCoil ){
+            
         
+      if( timeNew > timeToReportSpeed ){
         currentRPM = (1000 / (timeNew - timeLastTurn)) * 60;
-        if( abs( currentRPM - previousRPM ) > 300 and isDebug == true ){
-          Serial.println("RPM:");
-          Serial.println(currentRPM);
-        }  
-        previousRPM = currentRPM;
-        timeLastTurn = timeNew;
+        Serial.print("RPM:");
+        Serial.println(currentRPM);
+        timeToReportSpeed = timeNew + 120000;
+      }  
+      timeLastTurn = timeNew;
         
-      } 
-      */  
+       
       digitalWrite(C1, LOW);
       digitalWrite(C2, LOW);
       digitalWrite(C3, HIGH);
