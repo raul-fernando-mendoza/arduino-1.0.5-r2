@@ -16,46 +16,49 @@
   modified 2 Sep 2016
   by Arturo Guadalupi
 */
-#define INPUT_PORT A0
-#define INPUT_PORT_1 A1
-#define INPUT_PORT_2 A2
+#define SENSOR_PORT A0
 #define LED_BUILTIN 13
-#define C1 12
+#define C1 10
 #define C2 11
-#define C3 10
-#define INITIAL_PERIOD 40
+#define C3 12
 
-unsigned long timeOld;
-unsigned long timeNew;
-int currentCoil = 3;
-int minSensorValue = 1024/2;
-int maxSensorValue = 1024/2;
+#define INITIAL_PERIOD 100
+#define MIN_PERIOD 30
+#define DEBUG_TIME 1000
+#define DEBUG_TIME_QUIET 10000
+#define CHANGE_PERIOD_TIME 1000
+#define SENSOR_DRIVEN_LIMIT 50
+#define SENSOR_TEST_NUMBER 3000
+
+unsigned long timeOld = millis();
+unsigned long timeNew = millis();
+unsigned long logTime[100];
+
+int period = INITIAL_PERIOD;
+int currentCoil = C2;
 int sensorValue = 0;
+int sensorMinValue = 0;
+int sensorMaxValue = 0;
+int sensorMinValueNext = 0;
+int sensorMaxValueNext = 0;
+int sensorAverageValue = 0;
+int sensorIdx = 0;
+
+int currentDegrees = 0;
+
 int sensorPrevValue1 = 0;
 int sensorPrevValue2 = 0;
 int curveDirection = 0;
-
-unsigned long logTime[100]; 
-int logValues[100][4]; //0 sensorvalue, 1 currentcoil, 2 currentDegrees, 3 directions
-int  logIdx = 0;
-
-int period = INITIAL_PERIOD;
-int numturns = 0;
-int numTurnsAcceleration = 10;
-boolean isDebug = false;
-int currentDegrees;
-unsigned long timeLastTurn = 0;
-int previousRPM = 1;
-int currentRPM = 1;
-int maxSensorValueNext = 1024/2;
-int minSensorValueNext = 1024/2;
-unsigned long lastSensorValueMaxTime = 0;
-
-unsigned long timeToStartDebug = 0;
-unsigned long timeToReportSpeed = 0;
-
 boolean coilDriven = false;
 
+unsigned long timeToStartDebug = 0;
+int logValues[100][4]; //0 sensorvalue, 1 currentcoil, 2 currentDegrees, 3 directions
+boolean isDebug = false;
+int  logIdx = 0;
+unsigned timeToChangePeriod = millis() + CHANGE_PERIOD_TIME;
+int previousSensorValue = 0;
+unsigned long timeToReportSpeed = 0;
+long timeLastTurn = 0;
 
 // the setup function runs once when you press reset or power the board
 void setup() {
@@ -64,111 +67,127 @@ void setup() {
   pinMode(C1, OUTPUT);
   pinMode(C2, OUTPUT);
   pinMode(C3, OUTPUT);
-  pinMode(INPUT_PORT_1,INPUT);
+  pinMode(SENSOR_PORT,INPUT);
   
   Serial.begin(9600);
    // while the serial stream is not open, do nothing:
-  while (!Serial) ;
-  Serial.println("*Setup");
-  /*
-  for( int i=0; i<3;i++){
+  //while (!Serial) ;
+  Serial.println("Setup");
+  
+  //show the user that we are inititing
+  for( int i=0; i<5;i++){
     digitalWrite(LED_BUILTIN, HIGH);
     delay(500);  
     digitalWrite(LED_BUILTIN, LOW);
     delay(500);
   }
   
-
-  timeOld = millis();
-
-  long sum = 0;
-  minValue = analogRead(A0);
-  maxValue = analogRead(A0);
-  
-  for(int i=0; i<100; i++){
-    int v = analogRead(A0);
-    if( v < minValue ){ minValue = v-1; };
-    if( v > maxValue ){ maxValue = v+1; };
-    sum += v;
-    delay(100);
+  //find the normal value for the sensor
+  long sum =0 ;
+  Serial.println("sensor value");
+  for( int i=0; i<100;i++){
+    
+    sensorValue = analogRead(SENSOR_PORT);
+    sum += sensorValue;
+    Serial.println(sensorValue);
+    delay(10);
   }
+  sensorAverageValue = sum/100;
+  Serial.print("SensorAverageValue:");
+  Serial.println( sensorAverageValue ); 
 
- 
-  Serial.print("  Average: ");
-  averageValue = sum / 100;
-  Serial.print(averageValue);
+  //initalize send min and max used to set the sensor driven flag
+  sensorMinValue = analogRead(SENSOR_PORT);
+  sensorMaxValue = analogRead(SENSOR_PORT);
+  previousSensorValue = analogRead(SENSOR_PORT);
+  coilDriven = false;
 
-  Serial.print("  Min: ");
 
-  Serial.print(minValue);
+  //setup time variables
+  timeNew = millis();
+  timeOld = timeNew;
 
-  Serial.print("  Max: ");
-  Serial.print(maxValue);
-  
-  Serial.println();
+  //debug initialize
+  timeToStartDebug = timeNew;
+  isDebug = true;
 
-  for( int i=0; i<3;i++){
-    digitalWrite(LED_BUILTIN, HIGH);
-    delay(500);  
-    digitalWrite(LED_BUILTIN, LOW);
-    delay(500);
-  }
-*/
-  delay(5000);
-   Serial.println("Starting.");
+  timeToChangePeriod =  timeNew + CHANGE_PERIOD_TIME;
+
+  //delay(10000);
+  Serial.println("Starting.");
 }
 
 // the loop function runs over and over again forever
-void loop() {
 
+void loop() {
+  do{
+    previousSensorValue = sensorValue;
+    sensorValue = analogRead(SENSOR_PORT);
+  }while( abs(sensorValue - previousSensorValue) > 50 );
+  
+
+     
   timeNew = millis();
   
   // this section controls de debug  
-  if(timeToStartDebug == 0){
-    timeToStartDebug = timeNew;
-  }  
-  
-  if( (timeNew - timeToStartDebug) > 2000 && isDebug == true){
+  if( (timeNew - timeToStartDebug) > DEBUG_TIME && isDebug == true){
     //Serial.print("time since active");
     //Serial.println(timeNew - timeToStartDebug);
     isDebug = false;
-    timeToStartDebug =  timeNew + 10000;
+    Serial.print("MinValue:");
+    Serial.print(sensorMinValue);
+    Serial.print("\tAverageValue");
+    Serial.print(sensorAverageValue);
+    Serial.print("\tMaxValue:");
+    Serial.print(sensorMaxValue);
+    Serial.print("\tcoilDriven");
+    Serial.print(coilDriven);
+    Serial.print("period");
+    Serial.println(period);
+    timeToStartDebug =  timeNew + DEBUG_TIME_QUIET;
   }  
-  else if (timeNew >= timeToStartDebug){
+  else if (timeNew >= timeToStartDebug && false == isDebug  ){
     isDebug = true;
+
+
+         Serial.print("logIdx");
+         Serial.print("\t");
+         Serial.print("timeNew");
+         Serial.print("\t");
+         Serial.print("sensorValue");
+         Serial.print("\t");
+         Serial.print("currentCoil");
+         Serial.print("\t");         
+         Serial.print("currentDegrees");
+         Serial.print("\t");         
+         Serial.print("curveDirection");
+         Serial.print("\t");         
+         Serial.print("coilDriven");       
+         Serial.print("\n");
+
   }
-  
   // end debug logic 
 
-
-  
-  sensorValue = analogRead(INPUT_PORT_1);
-
-
-  
   //calculate max and min sensor value
-  
-  if(logIdx == 0){  
-    minSensorValue = minSensorValueNext;
-    maxSensorValue = maxSensorValueNext;
-    minSensorValueNext = sensorValue;    
-    maxSensorValueNext = sensorValue;
+  if( sensorIdx >= SENSOR_TEST_NUMBER  ){
+    sensorIdx = 0;
+    sensorMinValue = sensorMinValueNext;
+    sensorMaxValue = sensorMaxValueNext;
+    sensorMinValueNext = sensorValue;    
+    sensorMaxValueNext = sensorValue;
   }
   else{  
-    if( sensorValue > maxSensorValueNext ){
-       maxSensorValueNext = sensorValue;
+    sensorIdx++;
+    if( sensorValue > sensorMaxValueNext ){
+       sensorMaxValueNext = sensorValue;
     }   
-        
-    if( sensorValue < minSensorValueNext ){
-       minSensorValueNext = sensorValue;
+    if( sensorValue < sensorMinValueNext ){
+       sensorMinValueNext = sensorValue;
     }   
-    
   }
-    
 
-  currentDegrees = ((sensorValue - minSensorValue) * 180) / (maxSensorValue - minSensorValue);
-  
-
+  //calculate current degrees
+  currentDegrees = ((sensorValue - sensorMinValue) * 180) / (sensorMaxValue - sensorMinValue);
   
   //calculate curve direction and keep prev sensor values
   if ( sensorValue == sensorPrevValue1 && sensorPrevValue1 == sensorPrevValue2 )
@@ -182,113 +201,12 @@ void loop() {
   sensorPrevValue2 = sensorPrevValue1;
   sensorPrevValue1 = sensorValue;
 
-  /*
-  if( isDebug ){
-    Serial.print("sensorValue:");
-    Serial.print(sensorValue);
-
-    Serial.print(" sensorPrevValue1:");
-    Serial.print(sensorPrevValue1);
-    
-    Serial.print(" sensorPrevValue2:");
-    Serial.print(sensorPrevValue2);
-    
-    Serial.print(" curveDirection:");
-    Serial.println(curveDirection);
+  //calculate if the coild driven should start
+  if( (sensorMaxValue - sensorMinValue) > SENSOR_DRIVEN_LIMIT && period < 30 ){
+    coilDriven = true;
   }
-  */
-    
-  if(  coilDriven == false && numturns > numTurnsAcceleration ) {
-    numturns =0;
-    if( period > 10){
-      period = period - 1;
-      Serial.print("period:");
-      Serial.println(period);  
-      Serial.print("Max sensor value:");
-      Serial.println(maxSensorValue);
-      Serial.print("Min sensor value:");
-      Serial.println(minSensorValue);
-      if( period < 11 )
-       timeToStartDebug = timeNew;
-    }
-    else{
-      Serial.print("coildriven");
-      Serial.println(timeNew);
-      coilDriven = true;
-      timeToStartDebug =  timeNew;
-    }  
-  }  
-  
-
-  
-  if( coilDriven == true ){
-    if(  1 == curveDirection  && currentDegrees > 20 && currentCoil == 3){
-      digitalWrite(C1, HIGH);
-      digitalWrite(C2, LOW);
-      digitalWrite(C3, LOW);
-      currentCoil = 1;
-      timeOld = timeNew;
-    }
-    else if( 1==curveDirection && currentDegrees > 120 && currentCoil == 1 ){
-
-      digitalWrite(C1, LOW);
-      digitalWrite(C2, HIGH);
-      digitalWrite(C3, LOW);
-      currentCoil = 2;
-      
-      timeOld = timeNew;
-      
-      
-    }
-    else if(  -1 == curveDirection && currentDegrees <= 90 && currentCoil == 2 ){
-            
-        
-      if( timeNew > timeToReportSpeed ){
-        currentRPM = (1000 / (timeNew - timeLastTurn)) * 60;
-        Serial.print("RPM:");
-        Serial.println(currentRPM);
-        timeToReportSpeed = timeNew + 120000;
-      }  
-      timeLastTurn = timeNew;
-        
-       
-      digitalWrite(C1, LOW);
-      digitalWrite(C2, LOW);
-      digitalWrite(C3, HIGH);
-      currentCoil = 3;  
-      timeOld = timeNew;
-    }
-    else {
-      /*
-      if( 2 == currentCoil){
-        //do nothing is crossing up
-        currentCoil = 2;
-      }
-      else if( 1 == currentCoil){
-        digitalWrite(C1, LOW);
-        digitalWrite(C2, LOW);
-        digitalWrite(C3, HIGH);
-        currentCoil = 3;
-      }
-      else if( 3 == currentCoil){
-        digitalWrite(C1, LOW);
-        digitalWrite(C2, HIGH);
-        digitalWrite(C3, LOW);
-        currentCoil = 2;
-      }
-      
-        if(1 == currentCoil && currentDegrees > 100){
-          digitalWrite(C1, LOW);
-          digitalWrite(C2, HIGH);
-          digitalWrite(C3, LOW);
-          currentCoil = 2;
-        }  
-       */
-    }  
-  }
-  if( (coilDriven == false && (timeNew - timeOld) > period)  || ( coilDriven == true && (timeNew - timeOld) > 100) ){
-   
-    if( coilDriven == true ){
+  else{
+    if( true == coilDriven ){ // something when wrong
       digitalWrite(C1, LOW);
       digitalWrite(C2, LOW);
       digitalWrite(C3, LOW);
@@ -299,9 +217,9 @@ void loop() {
       Serial.print("timeNew:");
       Serial.println(timeNew);
       Serial.print("MinSensor:");
-      Serial.println(minSensorValue);
+      Serial.println(sensorMinValue );
       Serial.print("MaxSensor:");
-      Serial.println(maxSensorValue);
+      Serial.println(sensorMaxValue);
       Serial.print("currentDegrees:");
       Serial.print(currentDegrees);
       Serial.print("idx:");
@@ -332,68 +250,119 @@ void loop() {
          Serial.print("\t");         
          Serial.println(logValues[i][3]);         
       }
-      numTurnsAcceleration = 10;
-      period = INITIAL_PERIOD;      
       delay(10000);
+      period = INITIAL_PERIOD;
+      timeToChangePeriod =  timeNew + CHANGE_PERIOD_TIME;
     }
     coilDriven = false;
-    if(3 == currentCoil ){
-      //go to position 1
-     digitalWrite(LED_BUILTIN, HIGH);
-
-      digitalWrite(C1, HIGH);
+    
+  }
+    
+   if( logIdx < 99) logIdx++; else logIdx=0;
+  
+  logTime[logIdx] = timeNew;
+  logValues[logIdx][0] = sensorValue;
+  logValues[logIdx][1] = currentCoil * 10; 
+  logValues[logIdx][2] = currentDegrees;  
+  logValues[logIdx][3] = curveDirection;
+  
+  if( true==isDebug ) {
+    
+         Serial.print(logIdx);
+         Serial.print("\t");
+         Serial.print(timeNew);
+         Serial.print("\t");
+         Serial.print(sensorValue -550);
+         Serial.print("\t");
+         Serial.print(((currentCoil -9)*100)  );
+         Serial.print("\t");         
+         Serial.print(currentDegrees);
+         Serial.print("\t");         
+         Serial.print(curveDirection);
+         Serial.print("\t");         
+         Serial.print(coilDriven);       
+         Serial.print("\n");
+  }    
+  // end debug logic 
+ 
+  //should I acelerate
+  if( timeNew > timeToChangePeriod ){
+    if( period > MIN_PERIOD ){
+      period = period * 0.8;
+    }
+    timeToChangePeriod =  timeNew + CHANGE_PERIOD_TIME;
+  }  
+  
+  
+  if( coilDriven == true ){
+    if(  -1 == curveDirection  && currentDegrees < 120 && currentCoil == C3){
+      //go to 1
       digitalWrite(C2, LOW);
       digitalWrite(C3, LOW);
-      currentCoil = 1;
-    }  
-    else if(1 == currentCoil ){
-      //go to position 1
-      digitalWrite(LED_BUILTIN, LOW);
-
+      digitalWrite(C1, HIGH);
+      currentCoil = C1;
+     
+    }
+    else if( 1==curveDirection && currentDegrees < 120 && currentCoil == C1 ){
+      //go to 2
       digitalWrite(C1, LOW);
-      digitalWrite(C2, HIGH);
       digitalWrite(C3, LOW);
-      currentCoil = 2; 
-    }  
-    else {
-      //go to position 1
-      
-      digitalWrite(LED_BUILTIN, LOW);
+      digitalWrite(C2, HIGH);
+      currentCoil = C2;
+    }
+    else if( (1 == curveDirection && currentDegrees > 120 && currentCoil == C2) || (-1==curveDirection && currentDegrees > 120 && currentCoil == C2 )){
+          //go to 3  
+        
+      if( timeNew > timeToReportSpeed ){
+        int currentRPM = (1000 / (timeNew - timeLastTurn)) * 60;
+        Serial.print("RPM:");
+        Serial.println(currentRPM);
+        timeToReportSpeed = timeNew + 10000;
+      } 
+      timeLastTurn = timeNew; 
 
       digitalWrite(C1, LOW);
       digitalWrite(C2, LOW);
       digitalWrite(C3, HIGH);
-      currentCoil = 3;  
-      numturns++;  
-    } 
-    timeOld = timeNew;
+
+      currentCoil = C3;  
+    }
   }
+  else{
+    if( (timeNew - timeOld) > period ){
+
+      if(C1 == currentCoil ){
+        //go to position 2
+       digitalWrite(LED_BUILTIN, HIGH);
   
-  if( logIdx < 99) logIdx++; else logIdx=0;
+
+        digitalWrite(C3, LOW);
+        digitalWrite(C1, LOW);
+        digitalWrite(C2, HIGH);
+        
+        currentCoil = C2;
+      }  
+      else if(C2 == currentCoil ){
+        //go to position 3
+        digitalWrite(LED_BUILTIN, LOW);
   
-  logTime[logIdx] = timeNew;
-  logValues[logIdx][0] = sensorValue;
-  logValues[logIdx][1] = currentCoil * 100; 
-  logValues[logIdx][2] = currentDegrees;  
-  logValues[logIdx][3] = curveDirection;
+        digitalWrite(C1, LOW);
+        digitalWrite(C2, LOW);
+        digitalWrite(C3, HIGH);
+        currentCoil = C3; 
+      }  
+      else if(C3 == currentCoil ){
+        //go to position 1
+        
+        digitalWrite(LED_BUILTIN, LOW);
+
+        digitalWrite(C2, LOW);
+        digitalWrite(C3, LOW);
   
-  if( true==isDebug && coilDriven == false) {
-        if(logIdx == 0){
-          Serial.print("MinSensor:");
-          Serial.println(minSensorValue);
-          Serial.print("MaxSensor:");
-          Serial.println(maxSensorValue);            
-        }         
-         Serial.print(logIdx);
-         Serial.print("\t");         
-         Serial.print(logTime[logIdx]);
-         Serial.print("\t");
-         Serial.print(logValues[logIdx][0]);
-         Serial.print("\t");         
-         Serial.print(logValues[logIdx][1]);
-         Serial.print("\t");         
-         Serial.print(logValues[logIdx][2]);         
-         Serial.print("\t");         
-         Serial.println(logValues[logIdx][3]);
-  }  
+        digitalWrite(C1, HIGH);
+        currentCoil = C1;  
+      }
+      timeOld = timeNew;
+    }
+  }
 }
