@@ -18,9 +18,10 @@
 */
 
 #define INPUT_PORT A1
-#define C1 12
+#define LED_BUILTIN 13
+#define C1 10
 #define C2 11
-#define C3 10
+#define C3 12
 
 int sensorValueNew = 0;
 int sensorValueOld = 1024;
@@ -36,9 +37,13 @@ void setup() {
   
   Serial.begin(9600);
    // while the serial stream is not open, do nothing:
-  while (!Serial) ;
+  //while (!Serial) ;
 
    Serial.println("Starting.");
+
+    digitalWrite(C3, HIGH);
+    delay(3000);     
+    digitalWrite(C3, LOW);
 }
 
 // the loop function runs over and over again forever
@@ -48,21 +53,7 @@ void loop() {
  
   sensorValueNew = analogRead(INPUT_PORT);
   
-      digitalWrite(C1, HIGH);
-      digitalWrite(C2, LOW  );
-      digitalWrite(C3, LOW);
-delay(1000);
-      digitalWrite(C1, LOW);
-      digitalWrite(C2, HIGH  );
-      digitalWrite(C3, LOW);
-delay(1000);
-      digitalWrite(C1, LOW);
-      digitalWrite(C2, LOW  );
-      digitalWrite(C3, HIGH);
-delay(2000);
-
-
-    if( abs( sensorValueNew  - sensorValueOld) > 4 ){
+    if( abs( sensorValueNew  - sensorValueOld) > 6 ){
      /*  Serial.print(sensorValueNew  - sensorValueOld);
        Serial.print("\t");
        Serial.print(timeNew);
