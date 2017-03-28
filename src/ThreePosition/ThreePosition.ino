@@ -27,8 +27,8 @@
 #define DEBUG_TIME 1000
 #define DEBUG_TIME_QUIET 20000
 #define CHANGE_PERIOD_TIME 1000
-#define SENSOR_DRIVEN_LIMIT 60
-#define SENSOR_TEST_NUMBER 1000
+#define SENSOR_DRIVEN_LIMIT 100
+#define SENSOR_TEST_NUMBER 200 
 
 unsigned long timeOld = millis();
 unsigned long timeNew = millis();
@@ -71,8 +71,8 @@ void setup() {
   
   Serial.begin(9600);
    // while the serial stream is not open, do nothing:
-  //while (!Serial) ;
-  Serial.println("Setup");
+  while (!Serial) ;
+  Serial.println("Setup  200");
   
   //show the user that we are inititing
   for( int i=0; i<5;i++){
@@ -145,7 +145,7 @@ void loop() {
     Serial.println(period);
     timeToStartDebug =  timeNew + DEBUG_TIME_QUIET;
   }  
-  else if (timeNew >= timeToStartDebug && false == isDebug && false == coilDriven ){ 
+  else if (timeNew >= timeToStartDebug && false == isDebug  ){ //&& false == coilDriven 
     isDebug = true;
      Serial.print("logIdx");
      Serial.print("\ttimeNew");
@@ -162,29 +162,31 @@ void loop() {
   // end debug logic 
 
   // calculate sensorMax and sensorMin 
-  if( sensorIdx >= SENSOR_TEST_NUMBER  ){
-    sensorIdx = 0;
-    sensorMinValue = sensorMinValueNext;
-    sensorMaxValue = sensorMaxValueNext;
- //     Serial.print("MinValue:");
- //     Serial.print(sensorMinValue);
- //     Serial.print("\tMaxValue:");
- //     Serial.println(sensorMaxValue);      
-    sensorMinValueNext = sensorValue;    
-    sensorMaxValueNext = sensorValue;
+  if( abs(sensorValue - sensorPrevValue) < 20 ){ 
+    if( sensorIdx >= SENSOR_TEST_NUMBER  ){
+      sensorIdx = 0;
+      sensorMinValue = sensorMinValueNext;
+      sensorMaxValue = sensorMaxValueNext;
+   //     Serial.print("MinValue:");
+   //     Serial.print(sensorMinValue);
+   //     Serial.print("\tMaxValue:");
+   //     Serial.println(sensorMaxValue);      
+      sensorMinValueNext = sensorValue;    
+      sensorMaxValueNext = sensorValue;
+    }
+    else{ 
+      sensorIdx++;
+      if( sensorValue > sensorMaxValueNext ){
+         sensorMaxValueNext = sensorValue;
+      }   
+      if( sensorValue < sensorMinValueNext ){
+         sensorMinValueNext = sensorValue;
+      }   
+    }
   }
-  else{ 
-    sensorIdx++;
-    if( sensorValue > sensorMaxValueNext ){
-       sensorMaxValueNext = sensorValue;
-    }   
-    if( sensorValue < sensorMinValueNext ){
-       sensorMinValueNext = sensorValue;
-    }   
-  }
-  
   //calculate current degrees
-  currentDegrees = ((sensorValue - sensorMinValue) * 180) / (sensorMaxValue - sensorMinValue);
+  
+  currentDegrees = (((float)sensorValue - sensorMinValue) * 180/(sensorMaxValue - sensorMinValue));
 
   //calculate curve direction and keep prev sensor values
   if( abs(sensorValue - sensorPrevValue) < 20 ){   
@@ -275,7 +277,7 @@ void loop() {
   logValues[logIdx][3] = curveDirection;
   
   //print debug information
-  if( true==isDebug && coilDriven == false) { //
+  if( true==isDebug ) { // && coilDriven == false
     
 		Serial.print(logIdx);
 		Serial.print("\t");
@@ -312,7 +314,7 @@ void loop() {
   
   
   if( coilDriven == true ){
-    if(  -1 == curveDirection  && currentDegrees < 160  && currentDegrees > 70 && currentCoil == C3){
+    if(  1 == curveDirection  && currentDegrees > 0 && currentDegrees < 90 && currentCoil == C3){
       //go to 1
       digitalWrite(C2, LOW);
       digitalWrite(C3, LOW);
@@ -320,14 +322,14 @@ void loop() {
       currentCoil = C1;
      
     }
-    else if( -1==curveDirection && currentDegrees < 70 && currentCoil == C1 ){
+    else if( ( (1==curveDirection && currentDegrees > 90) || (-1 == curveDirection && currentDegrees > 140)) && currentCoil == C1 ){
       //go to 2
       digitalWrite(C1, LOW);
       digitalWrite(C3, LOW);
       digitalWrite(C2, HIGH);
       currentCoil = C2;
     }
-    else if( (1 == curveDirection && currentDegrees > 90 && currentCoil == C2) ){
+    else if( -1 == curveDirection && currentDegrees < 100 && currentCoil == C2 ){
           //go to 3  
         
       if( timeNew > timeToReportSpeed ){
@@ -383,3 +385,4 @@ void loop() {
     }
   }
 }
+

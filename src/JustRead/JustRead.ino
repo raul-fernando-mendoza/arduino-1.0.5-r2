@@ -40,10 +40,34 @@ void setup() {
   //while (!Serial) ;
 
    Serial.println("Starting.");
+    digitalWrite(C1, HIGH);
+    delay(3000);     
+    digitalWrite(C1, LOW);
+    
+    digitalWrite(C2, HIGH);
+    delay(3000);     
+    digitalWrite(C2, LOW);
 
     digitalWrite(C3, HIGH);
     delay(3000);     
     digitalWrite(C3, LOW);
+    
+    int sensorValue = 858;
+    int sensorMinValue = 655;
+    int sensorMaxValue = 979;
+    float currentDegrees = 0;
+      float f = (sensorValue - sensorMinValue) ;
+      Serial.print("f:");
+      Serial.println(f);
+       f = f * 180;
+      Serial.print("f:");      
+      Serial.println(f);
+      currentDegrees = (f/(sensorMaxValue - sensorMinValue));
+      Serial.print("currentDegrees:");
+      Serial.println(currentDegrees); 
+      currentDegrees = (((float)sensorValue - sensorMinValue) * 180/(sensorMaxValue - sensorMinValue));  
+      Serial.print("currentDegrees:");
+      Serial.println(currentDegrees);      
 }
 
 // the loop function runs over and over again forever
@@ -62,5 +86,6 @@ void loop() {
        Serial.println(sensorValueNew);
        sensorValueOld = sensorValueNew;
     }
+
     
 }
