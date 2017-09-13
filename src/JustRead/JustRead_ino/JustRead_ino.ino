@@ -38,10 +38,14 @@ int numVueltas = 0;
 void setup() {
   // initialize digital pin LED_BUILTIN as an output.
   pinMode(LED_BUILTIN, OUTPUT);
-  pinMode(C1, OUTPUT);
-  pinMode(C2, OUTPUT);
-  pinMode(C3, OUTPUT);
   pinMode(R1, INPUT);
+    delay(2000);
+  for( int i=0; i<5;i++){
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(1000);  
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(1000);
+  }
   
   Serial.begin(9600);
    // while the serial stream is not open, do nothing:
@@ -91,12 +95,7 @@ void loop() {
   
   Serial.println();
 
-  for( int i=0; i<3;i++){
-    digitalWrite(LED_BUILTIN, HIGH);
-    delay(500);  
-    digitalWrite(LED_BUILTIN, LOW);
-    delay(500);
-  }
+
 */
      sensorValueNew = analogRead(R1);
     if( abs(sensorValueOld - sensorValueNew) > 5 ){

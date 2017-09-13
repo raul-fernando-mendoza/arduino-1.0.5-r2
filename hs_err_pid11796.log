@@ -1,0 +1,213 @@
+#
+# A fatal error has been detected by the Java Runtime Environment:
+#
+#  EXCEPTION_ACCESS_VIOLATION (0xc0000005) at pc=0x6f697461, pid=11796, tid=1440
+#
+# JRE version: 6.0_16-b01
+# Java VM: Java HotSpot(TM) Client VM (14.2-b01 mixed mode windows-x86 )
+# Problematic frame:
+# C  0x6f697461
+#
+# If you would like to submit a bug report, please visit:
+#   http://java.sun.com/webapps/bugreport/crash.jsp
+# The crash happened outside the Java Virtual Machine in native code.
+# See problematic frame for where to report the bug.
+#
+
+---------------  T H R E A D  ---------------
+
+Current thread (0x0242cc00):  JavaThread "Thread-7" [_thread_in_native, id=1440, stack(0x10fb0000,0x11000000)]
+
+siginfo: ExceptionCode=0xc0000005, reading address 0x6f697461
+
+Registers:
+EAX=0x6120726f, EBX=0x00023325, ECX=0x76fd8c40, EDX=0x6120726f
+ESP=0x10fff2a0, EBP=0x63696c70, ESI=0x05b9ac10, EDI=0x0242cc00
+EIP=0x6f697461, EFLAGS=0x00010216
+
+Top of Stack: (sp=0x10fff2a0)
+0x10fff2a0:   6572206e 73657571 0a0d2e74 6d8c000a
+0x10fff2b0:   0242cc00 11e0640c 11e067d4 11bfc4f1
+0x10fff2c0:   11bf5de2 11bf7842 10fff350 6d8ccfc1
+0x10fff2d0:   0242cc00 11e0640c 11e067d4 00000000
+0x10fff2e0:   0242cc00 0242cc00 10fff370 6d8ccfc1
+0x10fff2f0:   0242cc00 11e0640c 11e067d4 11bf9e27
+0x10fff300:   0242cc00 0242cc00 04f80880 023ec59e
+0x10fff310:   04f80880 023ec59e 04f80880 04f80880 
+
+Instructions: (pc=0x6f697461)
+0x6f697451:   
+[error occurred during error reporting (printing registers, top of stack, instructions near pc), id 0xc0000005]
+
+Stack: [0x10fb0000,0x11000000],  sp=0x10fff2a0,  free space=316k
+Native frames: (J=compiled Java code, j=interpreted, Vv=VM code, C=native code)
+C  0x6f697461
+
+[error occurred during error reporting (printing native stack), id 0xc0000005]
+
+Java frames: (J=compiled Java code, j=interpreted, Vv=VM code)
+J  gnu.io.RXTXPort.nativeavailable()I
+J  gnu.io.RXTXPort$SerialInputStream.available()I
+J  processing.app.Serial.serialEvent(Lgnu/io/SerialPortEvent;)V
+J  gnu.io.RXTXPort.sendEvent(IZ)Z
+v  ~StubRoutines::call_stub
+j  gnu.io.RXTXPort.eventLoop()V+0
+j  gnu.io.RXTXPort$MonitorThread.run()V+12
+v  ~StubRoutines::call_stub
+
+---------------  P R O C E S S  ---------------
+
+Java Threads: ( => current thread )
+=>0x0242cc00 JavaThread "Thread-7" [_thread_in_native, id=1440, stack(0x10fb0000,0x11000000)]
+  0x02509000 JavaThread "DestroyJavaVM" [_thread_blocked, id=2908, stack(0x01ea0000,0x01ef0000)]
+  0x10b49000 JavaThread "TimerQueue" daemon [_thread_blocked, id=11312, stack(0x11d10000,0x11d60000)]
+  0x10aad400 JavaThread "AWT-EventQueue-0" [_thread_blocked, id=640, stack(0x11890000,0x118e0000)]
+  0x10a96800 JavaThread "AWT-Windows" daemon [_thread_in_native, id=9996, stack(0x10e40000,0x10e90000)]
+  0x10a95000 JavaThread "AWT-Shutdown" [_thread_blocked, id=11052, stack(0x10db0000,0x10e00000)]
+  0x10a94c00 JavaThread "Java2D Disposer" daemon [_thread_blocked, id=464, stack(0x10d10000,0x10d60000)]
+  0x02415800 JavaThread "Low Memory Detector" daemon [_thread_blocked, id=4520, stack(0x108b0000,0x10900000)]
+  0x0240e800 JavaThread "CompilerThread0" daemon [_thread_blocked, id=6952, stack(0x10820000,0x10870000)]
+  0x0240dc00 JavaThread "Attach Listener" daemon [_thread_blocked, id=11784, stack(0x10790000,0x107e0000)]
+  0x02409400 JavaThread "Signal Dispatcher" daemon [_thread_blocked, id=10008, stack(0x10700000,0x10750000)]
+  0x023e9800 JavaThread "Finalizer" daemon [_thread_blocked, id=9836, stack(0x10670000,0x106c0000)]
+  0x023e8400 JavaThread "Reference Handler" daemon [_thread_blocked, id=10916, stack(0x105e0000,0x10630000)]
+
+Other Threads:
+  0x023e4800 VMThread [stack: 0x10550000,0x105a0000] [id=9780]
+  0x02416c00 WatcherThread [stack: 0x10940000,0x10990000] [id=1580]
+
+VM state:not at safepoint (normal execution)
+
+VM Mutex/Monitor currently owned by a thread: None
+
+Heap
+ def new generation   total 9088K, used 2268K [0x04510000, 0x04ee0000, 0x04ee0000)
+  eden space 8128K,  20% used [0x04510000, 0x046acc58, 0x04d00000)
+  from space 960K,  64% used [0x04d00000, 0x04d9a538, 0x04df0000)
+  to   space 960K,   0% used [0x04df0000, 0x04df0000, 0x04ee0000)
+ tenured generation   total 121024K, used 26965K [0x04ee0000, 0x0c510000, 0x0c510000)
+   the space 121024K,  22% used [0x04ee0000, 0x069356d0, 0x06935800, 0x0c510000)
+ compacting perm gen  total 12288K, used 11906K [0x0c510000, 0x0d110000, 0x10510000)
+   the space 12288K,  96% used [0x0c510000, 0x0d0b0bc0, 0x0d0b0c00, 0x0d110000)
+No shared spaces configured.
+
+Dynamic libraries:
+0x00400000 - 0x00424000 	C:\projects\arduino-1.0.5-r2\java\bin\javaw.exe
+0x77530000 - 0x776b3000 	C:\WINDOWS\SYSTEM32\ntdll.dll
+0x74fa0000 - 0x75080000 	C:\WINDOWS\System32\KERNEL32.DLL
+0x76f10000 - 0x770b1000 	C:\WINDOWS\System32\KERNELBASE.dll
+0x766e0000 - 0x76757000 	C:\WINDOWS\System32\ADVAPI32.dll
+0x74ba0000 - 0x74c5e000 	C:\WINDOWS\System32\msvcrt.dll
+0x76ec0000 - 0x76f01000 	C:\WINDOWS\System32\sechost.dll
+0x748b0000 - 0x74971000 	C:\WINDOWS\System32\RPCRT4.dll
+0x73ff0000 - 0x7400e000 	C:\WINDOWS\System32\SspiCli.dll
+0x73fe0000 - 0x73fea000 	C:\WINDOWS\System32\CRYPTBASE.dll
+0x76e60000 - 0x76eba000 	C:\WINDOWS\System32\bcryptPrimitives.dll
+0x74590000 - 0x746ef000 	C:\WINDOWS\System32\USER32.dll
+0x74f70000 - 0x74f85000 	C:\WINDOWS\System32\win32u.dll
+0x74710000 - 0x7473b000 	C:\WINDOWS\System32\GDI32.dll
+0x74430000 - 0x7458a000 	C:\WINDOWS\System32\gdi32full.dll
+0x74da0000 - 0x74dc5000 	C:\WINDOWS\System32\IMM32.DLL
+0x7c340000 - 0x7c396000 	C:\projects\arduino-1.0.5-r2\java\bin\msvcr71.dll
+0x6d8b0000 - 0x6db3b000 	C:\projects\arduino-1.0.5-r2\java\bin\client\jvm.dll
+0x73310000 - 0x73334000 	C:\WINDOWS\SYSTEM32\WINMM.dll
+0x730e0000 - 0x73103000 	C:\WINDOWS\SYSTEM32\WINMMBASE.dll
+0x76850000 - 0x76886000 	C:\WINDOWS\System32\cfgmgr32.dll
+0x70e60000 - 0x70ef2000 	C:\WINDOWS\system32\apphelp.dll
+0x6d860000 - 0x6d86c000 	C:\projects\arduino-1.0.5-r2\java\bin\verify.dll
+0x6d3e0000 - 0x6d3ff000 	C:\projects\arduino-1.0.5-r2\java\bin\java.dll
+0x6d340000 - 0x6d348000 	C:\projects\arduino-1.0.5-r2\java\bin\hpi.dll
+0x75080000 - 0x75086000 	C:\WINDOWS\System32\PSAPI.DLL
+0x6d8a0000 - 0x6d8af000 	C:\projects\arduino-1.0.5-r2\java\bin\zip.dll
+0x72d60000 - 0x72d73000 	C:\WINDOWS\SYSTEM32\CRYPTSP.dll
+0x72d30000 - 0x72d5f000 	C:\WINDOWS\system32\rsaenh.dll
+0x73000000 - 0x7301b000 	C:\WINDOWS\SYSTEM32\bcrypt.dll
+0x73fc0000 - 0x73fda000 	C:\WINDOWS\SYSTEM32\USERENV.dll
+0x77250000 - 0x77330000 	C:\WINDOWS\System32\ucrtbase.dll
+0x74f60000 - 0x74f6f000 	C:\WINDOWS\System32\profapi.dll
+0x6d6c0000 - 0x6d6d3000 	C:\projects\arduino-1.0.5-r2\java\bin\net.dll
+0x77330000 - 0x77393000 	C:\WINDOWS\System32\WS2_32.dll
+0x72fb0000 - 0x72ffe000 	C:\WINDOWS\system32\mswsock.dll
+0x70e40000 - 0x70e52000 	C:\WINDOWS\system32\napinsp.dll
+0x6b130000 - 0x6b146000 	C:\WINDOWS\system32\pnrpnsp.dll
+0x6b110000 - 0x6b124000 	C:\WINDOWS\system32\NLAapi.dll
+0x72b00000 - 0x72b7d000 	C:\WINDOWS\SYSTEM32\DNSAPI.dll
+0x74420000 - 0x74427000 	C:\WINDOWS\System32\NSI.dll
+0x730b0000 - 0x730df000 	C:\WINDOWS\SYSTEM32\IPHLPAPI.DLL
+0x71fc0000 - 0x71fcc000 	C:\WINDOWS\System32\winrnr.dll
+0x6b0f0000 - 0x6b101000 	C:\WINDOWS\System32\wshbth.dll
+0x72aa0000 - 0x72aa8000 	C:\Windows\System32\rasadhlp.dll
+0x72ab0000 - 0x72af9000 	C:\WINDOWS\System32\fwpuclnt.dll
+0x10b90000 - 0x10bdc000 	C:\Users\Raul Mendoza\AppData\Local\Temp\jna7666867745399872037.tmp
+0x6d0b0000 - 0x6d1fa000 	C:\projects\arduino-1.0.5-r2\java\bin\awt.dll
+0x74cb0000 - 0x74d9c000 	C:\WINDOWS\System32\ole32.dll
+0x74980000 - 0x74b91000 	C:\WINDOWS\System32\combase.dll
+0x72a30000 - 0x72a9a000 	C:\WINDOWS\SYSTEM32\WINSPOOL.DRV
+0x67b00000 - 0x67d64000 	C:\WINDOWS\AppPatch\AcGenral.DLL
+0x74f10000 - 0x74f56000 	C:\WINDOWS\System32\SHLWAPI.dll
+0x773a0000 - 0x77434000 	C:\WINDOWS\System32\OLEAUT32.dll
+0x76570000 - 0x765eb000 	C:\WINDOWS\System32\msvcp_win.dll
+0x72f30000 - 0x72fa5000 	C:\WINDOWS\SYSTEM32\UxTheme.dll
+0x6b0d0000 - 0x6b0e5000 	C:\WINDOWS\SYSTEM32\samcli.dll
+0x750a0000 - 0x76478000 	C:\WINDOWS\System32\SHELL32.dll
+0x6b0b0000 - 0x6b0c8000 	C:\WINDOWS\SYSTEM32\MSACM32.dll
+0x72930000 - 0x72938000 	C:\WINDOWS\SYSTEM32\VERSION.dll
+0x768f0000 - 0x76e5e000 	C:\WINDOWS\System32\windows.storage.dll
+0x77440000 - 0x77485000 	C:\WINDOWS\System32\powrprof.dll
+0x75090000 - 0x7509d000 	C:\WINDOWS\System32\kernel.appcore.dll
+0x76650000 - 0x766d8000 	C:\WINDOWS\System32\shcore.dll
+0x72f10000 - 0x72f2f000 	C:\WINDOWS\SYSTEM32\dwmapi.dll
+0x71190000 - 0x71325000 	C:\WINDOWS\SYSTEM32\urlmon.dll
+0x6b090000 - 0x6b0a6000 	C:\WINDOWS\SYSTEM32\MPR.dll
+0x70f60000 - 0x7118b000 	C:\WINDOWS\SYSTEM32\iertutil.dll
+0x71db0000 - 0x71fba000 	C:\WINDOWS\WinSxS\x86_microsoft.windows.common-controls_6595b64144ccf1df_6.0.14393.953_none_89c2555adb023171\comctl32.dll
+0x74dd0000 - 0x74f05000 	C:\WINDOWS\System32\MSCTF.dll
+0x6d2e0000 - 0x6d334000 	C:\projects\arduino-1.0.5-r2\java\bin\fontmanager.dll
+0x6d6e0000 - 0x6d6e9000 	C:\projects\arduino-1.0.5-r2\java\bin\nio.dll
+0x76760000 - 0x767e4000 	C:\WINDOWS\System32\clbcatq.dll
+0x6b040000 - 0x6b084000 	C:\WINDOWS\system32\dataexchange.dll
+0x677b0000 - 0x678c3000 	C:\WINDOWS\system32\dcomp.dll
+0x678d0000 - 0x67b00000 	C:\WINDOWS\system32\d3d11.dll
+0x67720000 - 0x677a3000 	C:\WINDOWS\system32\dxgi.dll
+0x67620000 - 0x67711000 	C:\WINDOWS\system32\twinapi.appcore.dll
+0x11bf0000 - 0x11c02000 	C:\projects\arduino-1.0.5-r2\rxtxSerial.dll
+0x11c10000 - 0x11c37000 	C:\WINDOWS\SYSTEM32\crtdll.dll
+0x76480000 - 0x76565000 	C:\WINDOWS\System32\COMDLG32.DLL
+0x67150000 - 0x671cb000 	C:\Program Files (x86)\Common Files\microsoft shared\ink\tiptsf.dll
+0x67110000 - 0x6714d000 	C:\WINDOWS\SYSTEM32\edputil.dll
+0x66fa0000 - 0x6710e000 	C:\WINDOWS\SYSTEM32\WindowsCodecs.dll
+0x66f50000 - 0x66f93000 	C:\Windows\System32\thumbcache.dll
+0x72db0000 - 0x72eff000 	C:\WINDOWS\system32\propsys.dll
+0x66e80000 - 0x66f41000 	C:\WINDOWS\SYSTEM32\ntshrui.dll
+0x70f40000 - 0x70f5c000 	C:\WINDOWS\SYSTEM32\srvcli.dll
+0x71b30000 - 0x71b3f000 	C:\WINDOWS\SYSTEM32\cscapi.dll
+0x66df0000 - 0x66e75000 	C:\WINDOWS\System32\StructuredQuery.dll
+0x66d40000 - 0x66def000 	C:\WINDOWS\system32\Windows.Storage.Search.dll
+0x66c70000 - 0x66c82000 	C:\WINDOWS\system32\mssprxy.dll
+
+VM Arguments:
+jvm_args: -Xms128m -Xmx128m 
+java_command: processing.app.Base
+Launcher Type: SUN_STANDARD
+
+Environment Variables:
+PATH=C:\Program Files (x86)\Intel\iCLS Client\;C:\Program Files\Intel\iCLS Client\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\IPT;C:\Program Files\Intel\Intel(R) Management Engine Components\IPT;C:\Users\Raul Mendoza\AppData\Local\Microsoft\WindowsApps;;C:\projects\arduino-1.0.5-r2\java\bin
+USERNAME=Raul Mendoza
+OS=Windows_NT
+PROCESSOR_IDENTIFIER=Intel64 Family 6 Model 78 Stepping 3, GenuineIntel
+
+
+
+---------------  S Y S T E M  ---------------
+
+OS: Windows NT 6.2 Build 9200 
+
+CPU:total 4 (8 cores per cpu, 2 threads per core) family 6 model 78 stepping 3, cmov, cx8, fxsr, mmx, sse, sse2, sse3, ssse3, sse4.1, sse4.2, ht
+
+Memory: 4k page, physical 2097151k(2097151k free), swap 4194303k(4194303k free)
+
+vm_info: Java HotSpot(TM) Client VM (14.2-b01) for windows-x86 JRE (1.6.0_16-b01), built on Jul 31 2009 11:26:58 by "java_re" with MS VC++ 7.1
+
+time: Sun Sep 10 00:42:56 2017
+elapsed time: 82 seconds
+

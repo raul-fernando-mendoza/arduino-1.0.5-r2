@@ -22,13 +22,13 @@
 #define C2 11
 #define C3 12
 
-#define INITIAL_PERIOD 100
+#define INITIAL_PERIOD 200
 #define MIN_PERIOD 30
 #define DEBUG_TIME 1000
 #define DEBUG_TIME_QUIET 20000
 #define CHANGE_PERIOD_TIME 1000
 #define SENSOR_DRIVEN_LIMIT 100
-#define SENSOR_TEST_NUMBER 200 
+#define SENSOR_TEST_NUMBER 2000 
 
 unsigned long timeOld = millis();
 unsigned long timeNew = millis();
@@ -49,6 +49,7 @@ int sensorPrevValue = 0;
 int sensorPrevValue1 = 0;
 int sensorPrevValue2 = 0;
 int curveDirection = 0;
+char buffer[50];
 boolean coilDriven = false;
 
 unsigned long timeToStartDebug = 0;
@@ -71,8 +72,8 @@ void setup() {
   
   Serial.begin(9600);
    // while the serial stream is not open, do nothing:
-  while (!Serial) ;
-  Serial.println("Setup  200");
+  //while (!Serial) ;
+  Serial.println("Setup 200");
   
   //show the user that we are inititing
   for( int i=0; i<5;i++){
@@ -103,6 +104,7 @@ void setup() {
   coilDriven = false;
 
 
+
   //setup time variables
   timeNew = millis();
   timeOld = timeNew;
@@ -113,7 +115,27 @@ void setup() {
 
   timeToChangePeriod =  timeNew + CHANGE_PERIOD_TIME;
 
-  //delay(10000);
+
+      digitalWrite(C1, HIGH);
+      digitalWrite(C2, LOW);
+      digitalWrite(C3, LOW);
+      delay(2000);
+
+      digitalWrite(C1, LOW);
+      digitalWrite(C2, HIGH);
+      digitalWrite(C3, LOW);
+      delay(2000);
+      
+      digitalWrite(C1, LOW);
+      digitalWrite(C2, LOW);
+      digitalWrite(C3, HIGH);
+      delay(2000);
+
+      digitalWrite(C1, LOW);
+      digitalWrite(C2, LOW);
+      digitalWrite(C3, LOW);
+      
+
   Serial.println("Starting.");
 }
 
@@ -145,8 +167,9 @@ void loop() {
     Serial.println(period);
     timeToStartDebug =  timeNew + DEBUG_TIME_QUIET;
   }  
-  else if (timeNew >= timeToStartDebug && false == isDebug  ){ //&& false == coilDriven 
+  else if (timeNew >= timeToStartDebug && false == isDebug && false == coilDriven){ //  
     isDebug = true;
+    if(false != coilDriven){
      Serial.print("logIdx");
      Serial.print("\ttimeNew");
      Serial.print("\tsensorValue");
@@ -157,6 +180,7 @@ void loop() {
      Serial.print("\tsensorMinValue");       
      Serial.print("\tsensorMaxValue");       
      Serial.print("\n");
+    }
 
   }
   // end debug logic 
@@ -209,7 +233,7 @@ void loop() {
     }
   }
   else{
-    if( true == coilDriven ){ // something when wrong
+    if( true == coilDriven || period < 30){ // something when wrong
       digitalWrite(C1, LOW);
       digitalWrite(C2, LOW);
       digitalWrite(C3, LOW);
@@ -278,7 +302,7 @@ void loop() {
   
   //print debug information
   if( true==isDebug ) { // && coilDriven == false
-    
+    /*
 		Serial.print(logIdx);
 		Serial.print("\t");
 		Serial.print(timeNew);
@@ -297,12 +321,16 @@ void loop() {
 		Serial.print("\t");
 		Serial.print(sensorMaxValue);
 		Serial.print("\n");
+*/
+                //sprintf(buffer, "%d\t%lu\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n",logIdx,timeNew,sensorValue,((currentCoil -9)*100),currentDegrees,curveDirection,coilDriven,sensorMinValue,sensorMaxValue);
+                sprintf(buffer, "%lu\t%d\t%d\n",timeNew,sensorValue,((currentCoil -9)*100));
+                Serial.print(buffer);
   }    
   // end debug logic 
  
   //should I acelerate
   if( timeNew > timeToChangePeriod && period > MIN_PERIOD){
-    period = period * 0.90;
+    period = period * 0.80;
     timeToChangePeriod =  timeNew + CHANGE_PERIOD_TIME;
     Serial.print("period:");
     Serial.print(period);
@@ -314,7 +342,7 @@ void loop() {
   
   
   if( coilDriven == true ){
-    if(  1 == curveDirection  && currentDegrees > 0 && currentDegrees < 90 && currentCoil == C3){
+    if(  1 == curveDirection  && currentDegrees > 0 && currentDegrees < 120 && currentCoil == C3){
       //go to 1
       digitalWrite(C2, LOW);
       digitalWrite(C3, LOW);
@@ -322,14 +350,14 @@ void loop() {
       currentCoil = C1;
      
     }
-    else if( ( (1==curveDirection && currentDegrees > 90) || (-1 == curveDirection && currentDegrees > 140)) && currentCoil == C1 ){
+    else if( ( (1==curveDirection && currentDegrees > 120) || (-1 == curveDirection && currentDegrees > 130)) && currentCoil == C1 ){
       //go to 2
       digitalWrite(C1, LOW);
       digitalWrite(C3, LOW);
       digitalWrite(C2, HIGH);
       currentCoil = C2;
     }
-    else if( -1 == curveDirection && currentDegrees < 100 && currentCoil == C2 ){
+    else if( -1 == curveDirection && currentDegrees > 0 && currentDegrees < 130 && currentCoil == C2 ){
           //go to 3  
         
       if( timeNew > timeToReportSpeed ){

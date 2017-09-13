@@ -16,7 +16,7 @@
   modified 2 Sep 2016
   by Arturo Guadalupi
 */
-
+#define OUT_PORT 11
 unsigned long timeOld;
 unsigned long timeNew;
 int currentStatus = HIGH;
@@ -30,7 +30,7 @@ int numVueltas = 0;
 // the setup function runs once when you press reset or power the board
 void setup() {
   // initialize digital pin LED_BUILTIN as an output.
-  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(OUT_PORT, OUTPUT);
 
   Serial.begin(9600);
    // while the serial stream is not open, do nothing:
@@ -108,12 +108,12 @@ void loop() {
     */   
     if(currentStatus == HIGH ){
       Serial.println("switch to low");
-      digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
+      digitalWrite(OUT_PORT, LOW);    // turn the LED off by making the voltage LOW
       currentStatus = LOW;
     }
     else{
       Serial.println("switch to high");
-      digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+      digitalWrite(OUT_PORT, HIGH);   // turn the LED on (HIGH is the voltage level)
       currentStatus = HIGH;
     }
     timeOld = timeNew;
