@@ -24,16 +24,15 @@
 #define C4 11
 
 #define INITIAL_PERIOD 3000
-#define MIN_PERIOD 12
+#define MIN_PERIOD 15
 #define DEBUG_TIME 1000
 #define DEBUG_TIME_QUIET 10000
 #define CHANGE_PERIOD_TIME 1000
-#define SENSOR_DRIVEN_LIMIT 100
+#define SENSOR_DRIVEN_LIMIT 60
 #define SENSOR_TEST_NUMBER 1000
 
 unsigned long timeOld = millis();
 unsigned long timeNew = millis();
-unsigned long logTime[100];
 
 
 int period = INITIAL_PERIOD;
@@ -56,6 +55,7 @@ boolean coilDriven = false;
 unsigned long timeToStartDebug = 0;
 #define LOG_SIZE 100
 int logValues[LOG_SIZE][5]; //0 sensorvalue, 1 currentcoil, 2 currentDegrees, 3 directions, 4 coildriven
+unsigned long logTime[LOG_SIZE];
 int  logIdx = 0;
 int l=0;
 boolean isDebug = false;
@@ -83,6 +83,36 @@ void setup() {
   //while (!Serial) ;
   Serial.println("Starting.");
 
+  
+        Serial.println("Current coild 1");
+        digitalWrite(C1, HIGH); 
+        digitalWrite(C2, LOW);
+        digitalWrite(C3, LOW);
+        digitalWrite(C4, LOW);
+        delay(3000);  
+
+        Serial.println("Current coild 2");
+        digitalWrite(C1, LOW); 
+        digitalWrite(C2, HIGH);
+        digitalWrite(C3, LOW);
+        digitalWrite(C4, LOW);
+        delay(3000);  
+
+        Serial.println("Current coild 3");
+        digitalWrite(C1, LOW); 
+        digitalWrite(C2, LOW);
+        digitalWrite(C3, HIGH);
+        digitalWrite(C4, LOW);
+        delay(3000);  
+
+        Serial.println("Current coild 4");
+        digitalWrite(C1, LOW); 
+        digitalWrite(C2, LOW);
+        digitalWrite(C3, LOW);
+        digitalWrite(C4, HIGH);
+        delay(3000);  
+
+
   //find the normal value for the sensor
   long sum =0 ;
   for( int i=0; i<100;i++){
@@ -97,8 +127,10 @@ void setup() {
   
   sensorMinValue = analogRead(SENSOR_PORT);
   sensorMaxValue = analogRead(SENSOR_PORT);
-  
-  
+
+        
+
+
   
   timeNew = millis();
   timeToStartDebug = timeNew;
@@ -113,31 +145,27 @@ void loop() {
 
   sensorValue = analogRead(SENSOR_PORT);
   timeNew = millis();
-  //Serial.println(sensorValue);
-
+/*if( true!=isDebug) {
+  Serial.print(sensorValue);
+  Serial.print("\t");
+  Serial.print(currentCoil);
+  Serial.print("\t");
+  Serial.println(coilDriven);
+}*/
   //calculate curve direction and keep prev sensor values
-  if (logIdx > 0)
-    sensorPrevValue1 = logValues[logIdx-1][0];
-  else sensorPrevValue1 = logValues[99][0];
+  if (logIdx >= 0)
+    sensorPrevValue1 = logValues[logIdx][0];
+  else sensorPrevValue1 = logValues[LOG_SIZE-1][0];
   if (logIdx > 1 )
-     sensorPrevValue2 = logValues[logIdx-2][0];
-  else sensorPrevValue2 = logValues[99][0]; 
+     sensorPrevValue2 = logValues[logIdx-1][0];
+  else sensorPrevValue2 = logValues[LOG_SIZE-1][0]; 
 
-  if( abs(sensorValue - sensorPrevValue1) < 5 && abs(sensorPrevValue1 - sensorPrevValue2)  < 5  ){ 
-    if ( sensorValue == sensorPrevValue1 && sensorPrevValue1 == sensorPrevValue2 )
-          curveDirection = 0;
-    else if( sensorValue >= sensorPrevValue1 && sensorPrevValue1 >= sensorPrevValue2  )
+//Calculate curve direction
+    if( sensorValue >= sensorPrevValue1 && sensorPrevValue1 >= sensorPrevValue2  )
          curveDirection = 1;
     else if ( sensorValue <= sensorPrevValue1 && sensorPrevValue1 <= sensorPrevValue2 )
          curveDirection = -1;
-  }     
-  else  curveDirection = 0;  
-
-  int arrIdx = 0;
-  if( -1 == curveDirection ) 
-       arrIdx = 0;
-  else arrIdx = 1; 
-
+    //else if there is no change keep the same curve as before     
 
   //calculate max and min sensor value
   if(sensorIdx > SENSOR_TEST_NUMBER ){  
@@ -156,142 +184,153 @@ void loop() {
        sensorMinValueNext = sensorValue;
     }   
   }
-
-  if( (period  <= MIN_PERIOD || true == coilDriven) && (sensorMaxValue - sensorMinValue) < 50 ){
+  /*
+  //something when wrong restart the period and stop the coil driven
+  if( (period  <= MIN_PERIOD || true == coilDriven) && (sensorMaxValue - sensorMinValue) < SENSOR_DRIVEN_LIMIT ){
       Serial.print("ERROR");
       Serial.print(" sensorMaxValue:");
       Serial.print(sensorMaxValue);
       Serial.print(" sensorMinValue:");
-      Serial.println(sensorMinValue);
+      Serial.print(sensorMinValue);
+      Serial.print(" period:");
+      Serial.print(period);
+      Serial.print(" coilDriven:");
+      Serial.println(coilDriven);
        delay(5000);
        period = INITIAL_PERIOD;
        coilDriven = false;
   }
-
+  */
     
   //calculate current degrees
   currentDegrees = ((sensorValue - sensorMinValue) * 180) / (sensorMaxValue - sensorMinValue);
   
-
-
   //calculate if the coild driven should start
-  
-  if( false == coilDriven && (sensorMaxValue - sensorMinValue) > SENSOR_DRIVEN_LIMIT){
+  if( false == coilDriven && period  <= MIN_PERIOD && (sensorMaxValue - sensorMinValue) > SENSOR_DRIVEN_LIMIT){
     coilDriven = true;
-    //Serial.println("c");
+   // Serial.println("c");
   }
 
   
-  // end debug logic 
   if( true == coilDriven  ){
-      if(  C4 == currentCoil  && -1 ==curveDirection && 150 >= currentDegrees  && currentDegrees > 30 ){
-       digitalWrite(LED_BUILTIN, HIGH);
+      if(  C3 == currentCoil  && 1 == curveDirection && currentDegrees > 120 ){
+        //go to position 1
+        digitalWrite(LED_BUILTIN, HIGH);
   
         digitalWrite(C2, LOW); 
         digitalWrite(C3, LOW);
-        digitalWrite(C4, LOW);
+        
 
-        //Serial.println("Current coild 1");
+        //Serial.println("Current coild 1-4");
+        digitalWrite(C4, HIGH);
         digitalWrite(C1, HIGH);
+
         currentCoil = C1;
         timeOld = timeNew;
       }  
-      else if( (C1 == currentCoil  && -1 == curveDirection &&  currentDegrees <= 30) || 
-               (C1 == currentCoil  && 1 == curveDirection &&  currentDegrees < 30) ){
+      else if( C1 == currentCoil  && -1 == curveDirection &&  currentDegrees < 110 ){
+        //go to position 4
        digitalWrite(LED_BUILTIN, LOW);
   
-        digitalWrite(C1, LOW); 
-        digitalWrite(C2, LOW);
-        digitalWrite(C4, LOW);
+        digitalWrite(C3, LOW);
+        digitalWrite(C1, LOW);
         
-        //Serial.println("Current coild 2");
-        digitalWrite(C3, HIGH);
-        currentCoil = C3;
+        //Serial.println("Current coild 4-2");
+        digitalWrite(C2, HIGH);
+        digitalWrite(C4, HIGH);
+        currentCoil = C4;
         timeOld = timeNew;
       }  
-      else if( C3 == currentCoil  && 1 ==curveDirection && 120 >= currentDegrees  && currentDegrees > 30 ){
-       digitalWrite(LED_BUILTIN, LOW);
+      else if( C4 == currentCoil  && -1 == curveDirection &&  currentDegrees < 60 ){
+        //go to position 2
+        digitalWrite(LED_BUILTIN, LOW);
   
         digitalWrite(C1, LOW); 
-        digitalWrite(C3, LOW);
         digitalWrite(C4, LOW);
 
-      //  Serial.println("Current coild 4");
+        //Serial.println("Current coild 2-3");
+        digitalWrite(C3, HIGH);
         digitalWrite(C2, HIGH);
+        
         currentCoil = C2;
         timeOld = timeNew;
       }  
-      else if( (C2 == currentCoil  && 1 == curveDirection &&  currentDegrees >= 120) || 
-               (C2 == currentCoil  && -1 == curveDirection &&  currentDegrees > 150) ){
-       digitalWrite(LED_BUILTIN, LOW);
+      else if( C2 == currentCoil  && 1 == curveDirection &&  currentDegrees > 30 ){
+        //go to position 3
+        digitalWrite(LED_BUILTIN, LOW);
   
-        digitalWrite(C1, LOW); 
+        digitalWrite(C4, LOW); 
         digitalWrite(C2, LOW);
-        digitalWrite(C3, LOW);
 
-        //Serial.println("Current coild 3");
-        digitalWrite(C4, HIGH);
-        currentCoil = C4;
+        //Serial.println("Current coild 3-1");
+        digitalWrite(C1, HIGH);
+        digitalWrite(C3, HIGH);
+
+        currentCoil = C3;
         timeOld = timeNew;
       }  
   }
   else{
     if( (timeNew - timeOld) > period ){
      
-      if(C4 == currentCoil || 0 == currentCoil){
+      if(C3 == currentCoil || 0 == currentCoil){
         //go to position 1
-       digitalWrite(LED_BUILTIN, HIGH);
+//       digitalWrite(LED_BUILTIN, HIGH);
   
         digitalWrite(C2, LOW); 
         digitalWrite(C3, LOW);
-        digitalWrite(C4, LOW);
+        
 
-        //Serial.println("Current coild 1");
+        //Serial.println("Current coild 1-4");
+        digitalWrite(C4, HIGH);
         digitalWrite(C1, HIGH);
+
         currentCoil = C1;
         timeOld = timeNew;
       }  
       else if(C1 == currentCoil ){
-        //go to position 1
-       digitalWrite(LED_BUILTIN, LOW);
+        //go to position 4
+  //     digitalWrite(LED_BUILTIN, LOW);
   
-        digitalWrite(C1, LOW); 
-        digitalWrite(C2, LOW);
-        digitalWrite(C4, LOW);
-        
-        //Serial.println("Current coild 2");
-        digitalWrite(C3, HIGH);
-        currentCoil = C3;
-        timeOld = timeNew;
-      }  
-      else if(C2 == currentCoil ){
-        //go to position 1
-       digitalWrite(LED_BUILTIN, LOW);
-  
-        digitalWrite(C1, LOW); 
-        digitalWrite(C2, LOW);
         digitalWrite(C3, LOW);
-
-        //Serial.println("Current coild 3");
+        digitalWrite(C1, LOW);
+        
+        //Serial.println("Current coild 4-2");
+        digitalWrite(C2, HIGH);
         digitalWrite(C4, HIGH);
         currentCoil = C4;
         timeOld = timeNew;
       }  
-      else if(C3 == currentCoil ){
-        //go to position 1
-       digitalWrite(LED_BUILTIN, LOW);
+      else if(C4 == currentCoil ){
+        //go to position 2
+   //    digitalWrite(LED_BUILTIN, LOW);
   
         digitalWrite(C1, LOW); 
-        digitalWrite(C3, LOW);
         digitalWrite(C4, LOW);
 
-      //  Serial.println("Current coild 4");
+        //Serial.println("Current coild 2-3");
+        digitalWrite(C3, HIGH);
         digitalWrite(C2, HIGH);
+        
         currentCoil = C2;
+        timeOld = timeNew;
+      }  
+      else if(C2 == currentCoil ){
+        //go to position 3
+   //    digitalWrite(LED_BUILTIN, LOW);
+  
+        digitalWrite(C4, LOW); 
+        digitalWrite(C2, LOW);
+
+        //Serial.println("Current coild 3-1");
+        digitalWrite(C1, HIGH);
+        digitalWrite(C3, HIGH);
+
+        currentCoil = C3;
         timeOld = timeNew;
       }
     }
-    if( period > MIN_PERIOD && timeNew > timeToChangePeriod ){
+    if( false == coilDriven && period > MIN_PERIOD && timeNew > timeToChangePeriod ){
       if( period > 20 ){
         period = period * 0.9;
       }
@@ -303,8 +342,8 @@ void loop() {
     }  
   }
   
-  if ( abs(sensorValue - logValues[logIdx][0]) > 0 ){
-    if( logIdx < 99) logIdx++; else logIdx=0;
+//  if ( abs(sensorValue - logValues[logIdx][0]) > 0 ){
+    if( logIdx < (LOG_SIZE-1) ) logIdx++; else logIdx=0;
     
     logTime[logIdx] = timeNew;
     logValues[logIdx][0] = sensorValue;
@@ -313,21 +352,21 @@ void loop() {
     logValues[logIdx][3] = curveDirection;
     logValues[logIdx][4] = coilDriven;
     
-  }
+  //}
 //    Serial.print(timeNew);
 //    Serial.print("\t");
 //    Serial.print(sensorValue);
 //    Serial.print("\n");
 
   // this section controls de debug  
-  if( debugCount > LOG_SIZE && isDebug == true){
+  if(  isDebug == true && timeNew > (timeToStartDebug + DEBUG_TIME)){ //debugCount > LOG_SIZE
     //Serial.print("time since active");
     //Serial.println(timeNew - timeToStartDebug);
     isDebug = false;
-    if( logIdx < 99) l = logIdx + 1; else l = 0;
+    if( logIdx < (LOG_SIZE-1) ) l = logIdx + 1; else l = 0;
     timeToStartDebug =  timeNew + DEBUG_TIME_QUIET;
   }  
-  else if (timeNew >= timeToStartDebug && false == isDebug && false == coilDriven ){
+  else if (timeNew >= timeToStartDebug  && false == isDebug && false == coilDriven ){
          debugCount = 0;
          isDebug = true;
          Serial.print("logIdx");
@@ -347,9 +386,10 @@ void loop() {
 
   }
   
-  if( true==isDebug) {
-        debugCount++;
-         if( logIdx < 99){ 
+  if( true==isDebug ) {
+ //       debugCount++;
+/*
+         if( logIdx < (LOG_SIZE-1)){ 
            l = logIdx+1; 
          }
          else l=0;
@@ -383,7 +423,36 @@ void loop() {
          Serial.print("\t");
          Serial.print(logValues[l][4]);
          Serial.print("\n");
-
+*/
+         Serial.print(logIdx);
+         Serial.print("\t");
+         Serial.print(timeNew);
+         Serial.print("\t");
+         Serial.print(sensorValue);
+         Serial.print("\t");
+          switch (currentCoil) {
+            case C1:
+              Serial.print("100");
+              break;
+            case C3:
+              Serial.print("300");
+              break;
+            case C2:
+              Serial.print("200");
+              break;
+            case C4:
+              Serial.print("400");
+              break;
+            default:
+              Serial.print("-1");
+          }
+         Serial.print("\t");
+         Serial.print(currentDegrees);
+         Serial.print("\t");         
+         Serial.print(curveDirection);
+         Serial.print("\t");
+         Serial.print(coilDriven);
+         Serial.print("\n");
   }
 
 }
