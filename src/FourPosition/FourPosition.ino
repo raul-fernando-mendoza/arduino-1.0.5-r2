@@ -213,7 +213,7 @@ void loop() {
 
   
   if( true == coilDriven  ){
-      if(  C3 == currentCoil  && 1 == curveDirection && currentDegrees > 120 ){
+      if(  C3 == currentCoil  && 1 == curveDirection && currentDegrees > 135 ){
         //go to position 1
         digitalWrite(LED_BUILTIN, HIGH);
   
@@ -228,7 +228,7 @@ void loop() {
         currentCoil = C1;
         timeOld = timeNew;
       }  
-      else if( C1 == currentCoil  && -1 == curveDirection &&  currentDegrees < 110 ){
+      else if( C1 == currentCoil  && -1 == curveDirection &&  currentDegrees < 135 ){
         //go to position 4
        digitalWrite(LED_BUILTIN, LOW);
   
@@ -241,7 +241,7 @@ void loop() {
         currentCoil = C4;
         timeOld = timeNew;
       }  
-      else if( C4 == currentCoil  && -1 == curveDirection &&  currentDegrees < 60 ){
+      else if( C4 == currentCoil  && -1 == curveDirection &&  currentDegrees < 45 ){
         //go to position 2
         digitalWrite(LED_BUILTIN, LOW);
   
@@ -255,7 +255,7 @@ void loop() {
         currentCoil = C2;
         timeOld = timeNew;
       }  
-      else if( C2 == currentCoil  && 1 == curveDirection &&  currentDegrees > 30 ){
+      else if( C2 == currentCoil  && 1 == curveDirection &&  currentDegrees > 45 ){
         //go to position 3
         digitalWrite(LED_BUILTIN, LOW);
   
