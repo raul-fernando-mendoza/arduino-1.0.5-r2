@@ -184,7 +184,7 @@ void loop() {
        sensorMinValueNext = sensorValue;
     }   
   }
-  /*
+  
   //something when wrong restart the period and stop the coil driven
   if( (period  <= MIN_PERIOD || true == coilDriven) && (sensorMaxValue - sensorMinValue) < SENSOR_DRIVEN_LIMIT ){
       Serial.print("ERROR");
@@ -200,7 +200,7 @@ void loop() {
        period = INITIAL_PERIOD;
        coilDriven = false;
   }
-  */
+  
     
   //calculate current degrees
   currentDegrees = ((sensorValue - sensorMinValue) * 180) / (sensorMaxValue - sensorMinValue);
