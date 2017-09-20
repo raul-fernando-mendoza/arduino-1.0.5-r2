@@ -17,7 +17,7 @@
   by Arturo Guadalupi
 */
 
-#define INPUT_PORT A1
+#define INPUT_PORT A0
 #define LED_BUILTIN 13
 #define C1 10
 #define C2 11
