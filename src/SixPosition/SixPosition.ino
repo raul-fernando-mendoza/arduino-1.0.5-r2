@@ -26,7 +26,7 @@
 #define C6 2
 
 #define INITIAL_PERIOD 3000
-#define MIN_PERIOD 13
+#define MIN_PERIOD 14
 #define DEBUG_TIME_QUIET 20000
 #define CHANGE_PERIOD_TIME 1000
 #define SENSOR_DRIVEN_LIMIT 500
@@ -368,8 +368,7 @@ void loop() {
   
   
   if( coilDriven == true ){
-    if( ( 1 == curveDirection  && currentDegrees > 160  && currentPosition == 3 ) ||
-        ( -1 == curveDirection  && currentDegrees > 30  && currentPosition == 3 ) ){
+    if(  -1 == curveDirection && currentDegrees <=169 && currentPosition == 3  ){
       //go to 1
       digitalWrite(C4, LOW);
       digitalWrite(C1, HIGH);
@@ -380,8 +379,7 @@ void loop() {
       currentPosition = 1;
      
     }
-    else if( (-1==curveDirection && currentDegrees <= 30 && currentPosition == 1 ) ||
-             ( 1==curveDirection && currentDegrees > 0 && currentDegrees < 60 && currentPosition == 1) ){
+    else if( -1==curveDirection && currentDegrees <= 33 && currentPosition == 1   ){
       //go to 2
         digitalWrite(C1, LOW);
         digitalWrite(C4, HIGH);
@@ -391,7 +389,7 @@ void loop() {
         digitalWrite(C6, HIGH);
       currentPosition = 2;
     }
-    else if( (1 == curveDirection && currentDegrees > 60 && currentDegrees < 160 && currentPosition == 2) ){
+    else if( 1 == curveDirection && currentDegrees > 33 && currentPosition == 2 ){
           //go to 3  
         
       if( timeNew > timeToReportSpeed ){
