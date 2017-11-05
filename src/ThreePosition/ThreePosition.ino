@@ -22,13 +22,13 @@
 #define C2 9
 #define C3 10
 
-#define INITIAL_PERIOD 80
-#define MIN_PERIOD 18
+#define INITIAL_PERIOD 100
+#define MIN_PERIOD 15
 #define DEBUG_TIME 1000
 #define DEBUG_TIME_QUIET 20000
 #define CHANGE_PERIOD_TIME 3000
-#define SENSOR_DRIVEN_LIMIT 50
-#define SENSOR_TEST_NUMBER 300 
+#define SENSOR_DRIVEN_LIMIT 45
+#define SENSOR_TEST_NUMBER 150 
 #define LOG_SIZE 100
 
 unsigned long timeOld = millis();
@@ -134,7 +134,10 @@ void setup() {
   delay(2000);
 
 
-  Serial.println("Starting water sensor.");
+  Serial.print("Starting min period:");
+  Serial.println(MIN_PERIOD);
+  Serial.print("SENSOR_DRIVEN_LIMIT:");
+  Serial.println(SENSOR_DRIVEN_LIMIT);
 }
 
 // the loop function runs over and over again forever
@@ -408,7 +411,7 @@ void loop() {
       timeToStartDebug =  timeNew + DEBUG_TIME_QUIET;
 
     }  
-    else if (timeNew >= timeToStartDebug && false == isDebug ){ //   && false == coilDriven
+    else if (timeNew >= timeToStartDebug && false == isDebug && false == coilDriven ){ //   
       isDebug = true;
       logCount=0;
       Serial.print("idx");
