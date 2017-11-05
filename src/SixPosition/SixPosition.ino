@@ -26,7 +26,7 @@
 #define C6 2
 
 #define INITIAL_PERIOD 3000
-#define MIN_PERIOD 12
+#define MIN_PERIOD 13
 #define DEBUG_TIME_QUIET 20000
 #define CHANGE_PERIOD_TIME 1000
 #define SENSOR_DRIVEN_LIMIT 500
@@ -197,7 +197,7 @@ void loop() {
   sensorPrevValue2 = sensorPrevValue1;
   sensorPrevValue1 = sensorValue;
 
-  
+ 
   //calculate if the coild driven should start
   if( (sensorMaxValue - sensorMinValue) > SENSOR_DRIVEN_LIMIT && period < 30 ){
     if( coilDriven == false ){
@@ -265,10 +265,8 @@ void loop() {
       sensorMaxValue = sensorValue;      
       coilDriven = false;
     }
-
-    
   }
-    
+   
   // this section controls de debug  
 
   //first save the current values for debugging 
@@ -279,7 +277,7 @@ void loop() {
   logValues[logIdx][2] = currentDegrees;  
   logValues[logIdx][3] = curveDirection;
 
-  if (timeNew >= debugStartTime && false == debugActivated && false == coilDriven ){ 
+  if (timeNew >= debugStartTime && false == debugActivated  ){ //&& false == coilDriven 
     debugActivated = true;
 //    Serial.println("***************************************");
 //    Serial.print("timeNew:");
@@ -298,19 +296,19 @@ void loop() {
       debugIdxToPrint = logIdx + 1;
     else debugIdxToPrint = 0;
 
-    Serial.print("debugIdxToPrint:");
+    Serial.print("debugIdxToPrint:\t");
     Serial.print(debugIdxToPrint);
 
     
-    Serial.print("\tMinValue:\n");
+    Serial.print("\tMinValue:\t");
     Serial.print(sensorMinValue);
-    Serial.print("\tAverageValue:\n");
+    Serial.print("\tAverageValue:\t");
     Serial.print(sensorAverageValue);
-    Serial.print("\tMaxValue:\n");
+    Serial.print("\tMaxValue:\t");
     Serial.print(sensorMaxValue);
-    Serial.print("\tcoilDriven\n");
+    Serial.print("\tcoilDriven\t");
     Serial.print(coilDriven);
-    Serial.print("\tperiod:\n");
+    Serial.print("\tperiod:\t");
     Serial.println(period);
 
      Serial.print("logIdx");
@@ -370,7 +368,8 @@ void loop() {
   
   
   if( coilDriven == true ){
-    if(  -1 == curveDirection  && currentDegrees < 120  && currentDegrees > 10 && currentPosition == 3){
+    if( ( 1 == curveDirection  && currentDegrees > 160  && currentPosition == 3 ) ||
+        ( -1 == curveDirection  && currentDegrees > 30  && currentPosition == 3 ) ){
       //go to 1
       digitalWrite(C4, LOW);
       digitalWrite(C1, HIGH);
@@ -381,8 +380,8 @@ void loop() {
       currentPosition = 1;
      
     }
-    else if( (-1==curveDirection && currentDegrees < 10 && currentPosition == 1) ||
-               1==curveDirection && currentDegrees < 120 && currentPosition == 1){
+    else if( (-1==curveDirection && currentDegrees <= 30 && currentPosition == 1 ) ||
+             ( 1==curveDirection && currentDegrees > 0 && currentDegrees < 60 && currentPosition == 1) ){
       //go to 2
         digitalWrite(C1, LOW);
         digitalWrite(C4, HIGH);
@@ -392,7 +391,7 @@ void loop() {
         digitalWrite(C6, HIGH);
       currentPosition = 2;
     }
-    else if( (1 == curveDirection && currentDegrees > 120 && currentPosition == 2) ){
+    else if( (1 == curveDirection && currentDegrees > 60 && currentDegrees < 160 && currentPosition == 2) ){
           //go to 3  
         
       if( timeNew > timeToReportSpeed ){
