@@ -25,7 +25,7 @@
 #define C5 11
 #define C6 2
 
-#define INITIAL_PERIOD 3000
+#define INITIAL_PERIOD 2000
 #define MIN_PERIOD 14
 #define DEBUG_TIME_QUIET 20000
 #define CHANGE_PERIOD_TIME 1000
@@ -88,7 +88,7 @@ void setup() {
   
   Serial.begin(9600);
    // while the serial stream is not open, do nothing:
-  //while (!Serial) ;
+ // while (!Serial) ;
   Serial.println("Setup");
 
   //show the user that we are inititing
@@ -143,10 +143,10 @@ void setup() {
   timeToChangePeriod =  timeNew + CHANGE_PERIOD_TIME;
 
   //delay(10000);
-  Serial.print("MIN_PERIOD");
+  Serial.print("MIN_PERIOD:");
   Serial.print(MIN_PERIOD);
 
-  Serial.println("Starting.");
+  Serial.println(" Starting 2 bridges.");
 }
 
 // the loop function runs over and over again forever
@@ -157,7 +157,7 @@ void loop() {
     sensorValue = analogRead(SENSOR_PORT);
      
     timeNew = millis();
-  
+ 
 
   // calculate sensorMax and sensorMin 
   if( abs(sensorValue - sensorPrevValue) < 20 && (timeNew - timeOld) > 5){
@@ -205,7 +205,7 @@ void loop() {
       Serial.println("COIL DRIVEN");
     }
   }
-  else{
+/*  else{
     if( true == coilDriven ){ // something when wrong
       digitalWrite(C1, LOW);
       digitalWrite(C2, LOW);
@@ -266,7 +266,8 @@ void loop() {
       coilDriven = false;
     }
   }
-   
+ */
+
   // this section controls de debug  
 
   //first save the current values for debugging 
@@ -276,8 +277,9 @@ void loop() {
   logValues[logIdx][1] = currentPosition; 
   logValues[logIdx][2] = currentDegrees;  
   logValues[logIdx][3] = curveDirection;
+  
 
-  if (timeNew >= debugStartTime && false == debugActivated  ){ //&& false == coilDriven 
+  if (timeNew >= debugStartTime && false == debugActivated && false == coilDriven ){ //&& false == coilDriven 
     debugActivated = true;
 //    Serial.println("***************************************");
 //    Serial.print("timeNew:");
@@ -333,6 +335,7 @@ void loop() {
     }
   }
   
+  
   if( true==debugActivated) { //
     //calculate the index to print from the debugIndex
 
@@ -350,6 +353,7 @@ void loop() {
     Serial.print("\n");         
 
   }
+  
   // end debug logic 
  
   //should I acelerate
@@ -358,38 +362,47 @@ void loop() {
       period = period - 1;
     else period = period * 0.90;
     timeToChangePeriod =  timeNew + CHANGE_PERIOD_TIME;
+
     Serial.print("period:");
     Serial.print(period);
     Serial.print("\ttimeNew:");
     Serial.print(timeNew);
     Serial.print("\ttimeToChangePeriod:");
     Serial.println(timeToChangePeriod);
+    
   }  
-  
-  
+ 
+ 
   if( coilDriven == true ){
-    if(  -1 == curveDirection && currentDegrees <=169 && currentPosition == 3  ){
+    if(  1 == curveDirection && currentDegrees >= 0 && currentPosition == 3  ){
       //go to 1
-      digitalWrite(C4, LOW);
-      digitalWrite(C1, HIGH);
-      digitalWrite(C2, LOW);
-      digitalWrite(C5, HIGH);
-      digitalWrite(C3, LOW);
-      digitalWrite(C6, HIGH);
-      currentPosition = 1;
+        digitalWrite(LED_BUILTIN, HIGH);
+      
+        digitalWrite(C2, LOW);
+        digitalWrite(C3, LOW);
+        digitalWrite(C4, LOW);        
+        digitalWrite(C1, HIGH);
+        digitalWrite(C5, LOW);
+        digitalWrite(C6, HIGH);
+        currentPosition = 1;
+      timeOld = timeNew;
      
     }
-    else if( -1==curveDirection && currentDegrees <= 33 && currentPosition == 1   ){
+    else if( 1==curveDirection && currentDegrees >= 165 && currentPosition == 1   ){
       //go to 2
+        digitalWrite(LED_BUILTIN, LOW);
+        
         digitalWrite(C1, LOW);
-        digitalWrite(C4, HIGH);
+        digitalWrite(C3, LOW);        
         digitalWrite(C5, LOW);
         digitalWrite(C2, HIGH);
-        digitalWrite(C3, LOW);
-        digitalWrite(C6, HIGH);
-      currentPosition = 2;
+        digitalWrite(C4, HIGH);
+        digitalWrite(C6, LOW);
+        currentPosition = 2; 
+      timeOld = timeNew;
+
     }
-    else if( 1 == curveDirection && currentDegrees > 33 && currentPosition == 2 ){
+    else if( -1 == curveDirection && currentDegrees <= 138 && currentPosition == 2 ){
           //go to 3  
         
       if( timeNew > timeToReportSpeed ){
@@ -400,31 +413,30 @@ void loop() {
       } 
       timeLastTurn = timeNew; 
 
-      digitalWrite(C1, LOW);
-      digitalWrite(C4, HIGH);
+        digitalWrite(C1, LOW);
+        digitalWrite(C2, LOW);
+        digitalWrite(C6, LOW);
+        digitalWrite(C3, HIGH);
+        digitalWrite(C4, LOW);
+        digitalWrite(C5, HIGH);
+        currentPosition = 3;  
+        
+      timeOld = timeNew;
 
-      digitalWrite(C2, LOW);
-      digitalWrite(C5, HIGH);
-
-      digitalWrite(C3, HIGH);
-      digitalWrite(C6, LOW);
-
-      currentPosition = 3;  
     }
   }
-  else{
+  else
     if( (timeNew - timeOld) > period ){
 
       if(3 == currentPosition ){
         //Serial.println("1");
        //digitalWrite(LED_BUILTIN, HIGH);
-        digitalWrite(C4, LOW);
-        digitalWrite(C1, HIGH);
         digitalWrite(C2, LOW);
-        digitalWrite(C5, HIGH);
         digitalWrite(C3, LOW);
+        digitalWrite(C4, LOW);        
+        digitalWrite(C1, HIGH);
+        digitalWrite(C5, LOW);
         digitalWrite(C6, HIGH);
-        
         currentPosition = 1;
       }  
       else if(1 == currentPosition ){
@@ -432,11 +444,11 @@ void loop() {
         //digitalWrite(LED_BUILTIN, LOW);
   
         digitalWrite(C1, LOW);
-        digitalWrite(C4, HIGH);
+        digitalWrite(C3, LOW);        
         digitalWrite(C5, LOW);
         digitalWrite(C2, HIGH);
-        digitalWrite(C3, LOW);
-        digitalWrite(C6, HIGH);
+        digitalWrite(C4, HIGH);
+        digitalWrite(C6, LOW);
         currentPosition = 2; 
       }  
       else if(2 == currentPosition ){
@@ -445,16 +457,22 @@ void loop() {
         //digitalWrite(LED_BUILTIN, LOW);
 
         digitalWrite(C1, LOW);
-        digitalWrite(C4, HIGH);
-
         digitalWrite(C2, LOW);
-        digitalWrite(C5, HIGH);
-
-        digitalWrite(C3, HIGH);
         digitalWrite(C6, LOW);
+        digitalWrite(C3, HIGH);
+        digitalWrite(C4, LOW);
+        digitalWrite(C5, HIGH);
         currentPosition = 3;  
       }
       timeOld = timeNew;
     }
-  }
+    if( (timeNew - timeOld) > 100 ){
+        digitalWrite(C1, LOW);
+        digitalWrite(C4, LOW);
+        digitalWrite(C2, LOW);
+        digitalWrite(C5, LOW);
+        digitalWrite(C6, LOW);
+        digitalWrite(C3, LOW);      
+    }
+  //
 }
