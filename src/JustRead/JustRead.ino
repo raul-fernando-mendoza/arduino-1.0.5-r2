@@ -17,7 +17,7 @@
   by Arturo Guadalupi
 */
 
-#define INPUT_PORT A0
+#define INPUT_PORT A1
 #define LED_BUILTIN 13
 #define C1 10
 #define C2 11
@@ -75,17 +75,14 @@ void loop() {
 
   timeNew = millis();
  
-  sensorValueNew = analogRead(INPUT_PORT);
-  
-    if( abs( sensorValueNew  - sensorValueOld) > 6 ){
-     /*  Serial.print(sensorValueNew  - sensorValueOld);
-       Serial.print("\t");
-       Serial.print(timeNew);
-       */
-
-       Serial.println(sensorValueNew);
-       sensorValueOld = sensorValueNew;
-    }
+  Serial.print(  sensorValueNew=analogRead(A0) ); Serial.print("\t");
+  Serial.print(  sensorValueNew=analogRead(A1) ); Serial.print("\t");
+  Serial.print(  sensorValueNew=analogRead(A2) ); Serial.print("\t");
+  Serial.print(  sensorValueNew=analogRead(A3) ); Serial.print("\t");
+  Serial.print(  sensorValueNew=analogRead(A4) ); Serial.print("\t");
+  Serial.print(  sensorValueNew=analogRead(A5) );
+  Serial.println("");
+       
 
     
 }
