@@ -1,7 +1,7 @@
 /*     Simple Stepper Motor Control Exaple Code
  *      
  *  by Dejan Nedelkovski, www.HowToMechatronics.com
- *  
+ *  https://howtomechatronics.com/tutorials/arduino/how-to-control-stepper-motor-with-a4988-driver-and-arduino/
  */
 // defines pins numbers
 const int stepPin = 3; 
